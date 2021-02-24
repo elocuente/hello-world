@@ -1,2 +1,2 @@
-FROM php:5.6-apache
+FROM httpd
 COPY index.php /var/www/html/
