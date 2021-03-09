@@ -17,7 +17,7 @@ spec:
         image: 075895093411.dkr.ecr.us-east-1.amazonaws.com/helloworld:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8085
+        - containerPort: 80
 # service type loadbalancer
 ---
 apiVersion: v1
@@ -29,6 +29,6 @@ spec:
     app: php-app
   ports:
     - protocol: TCP
-      port: 8085
-      targetPort: 8085
+      port: 80
+      targetPort: 80
   type: LoadBalancer
