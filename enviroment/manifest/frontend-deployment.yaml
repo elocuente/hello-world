@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: my-php-app
-        image: 075895093411.dkr.ecr.us-east-1.amazonaws.com/helloworld:latest
+        image: "url"/helloworld:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
