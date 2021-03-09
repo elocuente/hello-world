@@ -1,0 +1,48 @@
+#!/bin/bash
+# Install all pending updates to the system
+yum -y update
+# Configure YUM to be able to access official Jenkins RPM packages
+wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+# Import the Jenkins repository public key
+rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+# Configure YUM to be able to access contributed Maven RPM packages
+wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+# Update the release version in the Maven repository configuration for this mainline release of Amazon Linux
+sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+# Install the Java 8 SDK, Git, Jenkins and Maven
+yum -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel git jenkins apache-maven
+# Set the default version of java to run out of the Java 8 SDK path (required by Jenkins)
+update-alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
+update-alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/javac
+# Start the Jenkins service
+service jenkins start
+#Install aws cli2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+#Install eksctl
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+mv /tmp/eksctl /usr/local/bin
+
+#Install Kubectl
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+yum install -y kubectl
+#Install docker
+yum update -y
+yum install docker -y
+service docker start
+usermod -a -G docker ec2-user
+chgrp docker /lib/systemd/system/docker.socket
+chmod g+w /lib/systemd/system/docker.socket
+newgrp docker
+systemctl enable docker.service
+reboot
